@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(children: [
           InkWell(
             child: Text("This is a button"),
+            onTap: () {},
           ),
           Text("This is demo text"),
           Row(

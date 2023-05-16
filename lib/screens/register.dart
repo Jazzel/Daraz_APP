@@ -5,9 +5,11 @@ import 'package:daraz_app/widgets/first.dart';
 import 'package:daraz_app/widgets/textLogin.dart';
 import 'package:daraz_app/widgets/verticalText.dart';
 
-class LoginPage extends StatelessWidget {
+class RegisterPage extends StatelessWidget {
   TextEditingController emailController = new TextEditingController();
   TextEditingController passwordController = new TextEditingController();
+  TextEditingController nameController = new TextEditingController();
+  TextEditingController contactController = new TextEditingController();
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
@@ -15,6 +17,8 @@ class LoginPage extends StatelessWidget {
   Widget build(BuildContext context) {
     emailController.text = "admin@gmail.com";
     passwordController.text = "admin1234";
+    nameController.text = "name";
+    contactController.text = "03000000";
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
@@ -29,7 +33,7 @@ class LoginPage extends StatelessWidget {
             Column(
               children: <Widget>[
                 Row(children: <Widget>[
-                  VerticalText(text: "Sign In"),
+                  VerticalText(text: "Sign Up"),
                   TextLogin(),
                 ]),
                 Padding(
@@ -54,6 +58,64 @@ class LoginPage extends StatelessWidget {
                         ),
                         fillColor: Colors.lightBlueAccent,
                         labelText: 'Email',
+                        labelStyle: TextStyle(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 50, left: 50, right: 50),
+                  child: Container(
+                    height: 60,
+                    width: MediaQuery.of(context).size.width,
+                    child: TextField(
+                      controller: nameController,
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        border: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        fillColor: Colors.lightBlueAccent,
+                        labelText: 'Name',
+                        labelStyle: TextStyle(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 50, left: 50, right: 50),
+                  child: Container(
+                    height: 60,
+                    width: MediaQuery.of(context).size.width,
+                    child: TextField(
+                      controller: contactController,
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        border: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                        fillColor: Colors.lightBlueAccent,
+                        labelText: 'Contact Number',
                         labelStyle: TextStyle(
                           color: Colors.white70,
                         ),

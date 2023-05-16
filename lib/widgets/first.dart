@@ -26,7 +26,7 @@ class _FirstTimeState extends State<FirstTime> {
               ),
             ),
             InkWell(
-              onTap: () {},
+              onTap: () => Navigator.of(context).pushNamed(RegisterRoute),
               child: Text(
                 'Sign up',
                 style: TextStyle(
