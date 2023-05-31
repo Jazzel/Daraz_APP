@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:daraz_app/app.dart';
 import 'package:flutter/material.dart';
 
 import 'package:daraz_app/widgets/first.dart';
 import 'package:daraz_app/widgets/textLogin.dart';
 import 'package:daraz_app/widgets/verticalText.dart';
+
+import 'package:http/http.dart' as http;
 
 class RegisterPage extends StatelessWidget {
   TextEditingController emailController = new TextEditingController();
@@ -15,9 +19,9 @@ class RegisterPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    emailController.text = "admin@gmail.com";
+    emailController.text = "jazzelmehmood7@gmail.com";
     passwordController.text = "admin1234";
-    nameController.text = "name";
+    nameController.text = "Jazzel Mehmood";
     contactController.text = "03000000";
     return Scaffold(
       key: _scaffoldKey,
@@ -174,8 +178,29 @@ class RegisterPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: InkWell(
-                      onTap: () =>
-                          Navigator.of(context).pushNamed(DashboardRoute),
+                      onTap: () async {
+                        var url = Uri.parse("http://localhost:5000/api/users");
+
+                        var requestBody = {
+                          "email": emailController.text,
+                          "password": passwordController.text,
+                          "name": nameController.text,
+                          "contact": contactController.text
+                        };
+
+                        var response = await http.post(url,
+                            body: requestBody,
+                            headers: {"Content-Type": "application/json"});
+
+                        if (response.statusCode == 200) {
+                          Navigator.of(context).pushNamed(DashboardRoute);
+                        } else {
+                          final snackbar = new SnackBar(
+                              content: Text("Something went wrong !"));
+
+                          ScaffoldMessenger.of(context).showSnackBar(snackbar);
+                        }
+                      },
                       child: Align(
                           alignment: Alignment.center,
                           child: Row(
