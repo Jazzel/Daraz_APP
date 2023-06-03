@@ -9,6 +9,7 @@ class HomePage extends StatefulWidget {
 }
 
 typedef FetchProduct = void Function();
+typedef FetchShoppingCart = void Function();
 
 class _HomePageState extends State<HomePage> {
   @override
@@ -20,47 +21,110 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Container(
         margin: EdgeInsets.symmetric(vertical: 10),
-        child: Column(children: [
-          InkWell(
-            child: Text("This is a button"),
-            onTap: () {},
-          ),
-          Text("This is demo text"),
-          Padding(padding: EdgeInsets.only(top: 20)),
-          StoreConnector<AppState, FetchProduct>(converter: (store) {
-            return () async {
-              store.dispatch(fetchProducts);
-              Navigator.of(context).pushNamed(MyProductsRoute);
-            };
-          }, builder: (_, fetchProductsCallback) {
-            return InkWell(
-              child: Container(
-                color: Colors.red,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 30),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        "My Profile",
-                        style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Column(children: [
+            InkWell(
+              child: Text(
+                "Hello User Dave !",
+                style: TextStyle(fontSize: 20),
+              ),
+              onTap: () {},
+            ),
+            Padding(padding: EdgeInsets.only(top: 20)),
+            StoreConnector<AppState, FetchProduct>(converter: (store) {
+              return () async {
+                store.dispatch(fetchProducts);
+                Navigator.of(context).pushNamed(MyProductsRoute);
+              };
+            }, builder: (_, fetchProductsCallback) {
+              return InkWell(
+                child: Container(
+                  color: Colors.black,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "My Profile",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      Padding(padding: EdgeInsets.only(left: 10)),
-                      Icon(Icons.supervised_user_circle, color: Colors.white),
-                    ],
+                        Padding(padding: EdgeInsets.only(left: 10)),
+                        Icon(Icons.supervised_user_circle, color: Colors.white),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              onTap: fetchProductsCallback,
-            );
-          }),
-          Row(
-            children: [Text("This is demo text")],
-          )
-        ]),
+                onTap: fetchProductsCallback,
+              );
+            }),
+            Padding(padding: EdgeInsets.only(top: 10)),
+            StoreConnector<AppState, FetchProduct>(converter: (store) {
+              return () async {
+                store.dispatch(fetchProducts);
+                Navigator.of(context).pushNamed(MyProductsRoute);
+              };
+            }, builder: (_, fetchProductsCallback) {
+              return InkWell(
+                child: Container(
+                  color: Colors.black,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Products List",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Padding(padding: EdgeInsets.only(left: 10)),
+                        Icon(Icons.supervised_user_circle, color: Colors.white),
+                      ],
+                    ),
+                  ),
+                ),
+                onTap: fetchProductsCallback,
+              );
+            }),
+            Padding(padding: EdgeInsets.only(top: 10)),
+            StoreConnector<AppState, FetchShoppingCart>(converter: (store) {
+              return () async {
+                Navigator.of(context).pushNamed(ShoppingCartRoute);
+              };
+            }, builder: (_, fetchProductsCallback) {
+              return InkWell(
+                child: Container(
+                  color: Colors.black,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Shopping Cart",
+                          style: TextStyle(
+                            fontSize: 20,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Padding(padding: EdgeInsets.only(left: 10)),
+                        Icon(Icons.supervised_user_circle, color: Colors.white),
+                      ],
+                    ),
+                  ),
+                ),
+                onTap: fetchProductsCallback,
+              );
+            }),
+          ]),
+        ),
       ),
     );
   }

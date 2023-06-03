@@ -1,4 +1,6 @@
 import 'package:daraz_app/screens/addProduct.dart';
+import 'package:daraz_app/screens/checkout.dart';
+import 'package:daraz_app/screens/shoppingcart.dart';
 import 'package:daraz_app/widgets/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,6 +8,7 @@ import 'package:daraz_app/screens/login.dart';
 import 'package:daraz_app/screens/register.dart';
 import 'package:daraz_app/screens/myproducts.dart';
 import 'package:daraz_app/screens/addProduct.dart';
+import 'package:daraz_app/screens/checkout.dart';
 
 import 'package:redux/redux.dart';
 import 'package:flutter_redux/flutter_redux.dart';
@@ -18,6 +21,8 @@ const DashboardRoute = "/dashboard";
 const RegisterRoute = "/register";
 const MyProductsRoute = "/myproducts";
 const AddProductRoute = "/addproduct";
+const ShoppingCartRoute = "/shoppingcart";
+const CheckoutRoute = "/checkout";
 
 class AppState {
   final List _products;
@@ -223,9 +228,13 @@ class App extends StatelessWidget {
           screen = MyProductsPage();
           break;
         case AddProductRoute:
-          screen = AddProductPage(
-              // product: arguments["product"]
-              );
+          screen = AddProductPage();
+          break;
+        case ShoppingCartRoute:
+          screen = ShoppingCartPage();
+          break;
+        case CheckoutRoute:
+          screen = CheckoutPage();
           break;
         default:
           return null;

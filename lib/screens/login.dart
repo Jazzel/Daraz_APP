@@ -24,7 +24,7 @@ class LoginPage extends StatelessWidget {
           gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Color(0xFFEB5757), Color(0xFF000000)]),
+              colors: [Colors.black, Colors.black]),
         ),
         child: ListView(
           children: <Widget>[

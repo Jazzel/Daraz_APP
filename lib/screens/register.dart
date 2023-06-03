@@ -30,7 +30,10 @@ class RegisterPage extends StatelessWidget {
           gradient: LinearGradient(
               begin: Alignment.topRight,
               end: Alignment.bottomLeft,
-              colors: [Color(0xFFEB5757), Color(0xFF000000)]),
+              colors: [
+                Color.fromRGBO(44, 62, 80, 1),
+                Color.fromRGBO(41, 128, 185, 1),
+              ]),
         ),
         child: ListView(
           children: <Widget>[
