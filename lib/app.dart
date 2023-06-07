@@ -1,5 +1,6 @@
 import 'package:daraz_app/screens/addProduct.dart';
 import 'package:daraz_app/screens/checkout.dart';
+import 'package:daraz_app/screens/home.dart';
 import 'package:daraz_app/screens/shoppingcart.dart';
 import 'package:daraz_app/widgets/navigator.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,8 @@ import "package:redux_thunk/redux_thunk.dart";
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 const LoginRoute = "/";
 const DashboardRoute = "/dashboard";
 const RegisterRoute = "/register";
@@ -23,15 +26,106 @@ const MyProductsRoute = "/myproducts";
 const AddProductRoute = "/addproduct";
 const ShoppingCartRoute = "/shoppingcart";
 const CheckoutRoute = "/checkout";
+const HomeRoute = "/home";
+
+class CartItem {
+  final String name;
+  int quantity;
+  final double price;
+
+  CartItem({required this.name, required this.quantity, required this.price});
+
+  factory CartItem.fromJson(Map<String, dynamic> json) {
+    return CartItem(
+      name: json['name'],
+      quantity: json['quantity'],
+      price: json['price'],
+    );
+  }
+
+  Map<String, dynamic> toJson() =>
+      {"name": name, "quantity": quantity, "price": price};
+}
 
 class AppState {
-  final List _products;
+  List _products;
+  List<CartItem> _shoppingcart;
 
   List get products => _products;
+  List<CartItem> get shoppingcart => _shoppingcart;
 
-  AppState(this._products);
+  AppState(this._products, this._shoppingcart);
 
-  AppState.initialState() : _products = [];
+  AppState.initialState()
+      : _products = [],
+        _shoppingcart = [];
+
+  Future<void> loadShoppingCartFromSharedPreferences() async {
+    try {
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final List<String>? cartData = prefs.getStringList('shoppingCart');
+
+      if (cartData != null) {
+        _shoppingcart = cartData
+            .map((data) => CartItem.fromJson(data as Map<String, dynamic>))
+            .toList() as List<CartItem>;
+      }
+    } catch (e) {
+      print("Failed to load cart !");
+    }
+  }
+}
+
+Future<void> saveShoppingCartToSharedPreferences(List<CartItem> cart) async {
+  try {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final List<String> cartData =
+        cart.map((item) => item.toJson()).toList() as List<String>;
+
+    await prefs.setStringList('shoppingCart', cartData);
+  } catch (e) {
+    print("Failed to save shooping cart");
+  }
+}
+
+class FetchShoppingCartAction {
+  final List<CartItem> _shoppingcart;
+
+  List<CartItem> get shoppingcart => _shoppingcart;
+
+  FetchShoppingCartAction(this._shoppingcart);
+}
+
+class AddCartItemAction {
+  final CartItem _product;
+
+  CartItem get product => _product;
+
+  AddCartItemAction(this._product);
+}
+
+class RemoveCartItemAction {
+  final CartItem _product;
+
+  CartItem get product => _product;
+
+  RemoveCartItemAction(this._product);
+}
+
+class IncrementCartItemAction {
+  final CartItem _product;
+
+  CartItem get product => _product;
+
+  IncrementCartItemAction(this._product);
+}
+
+class DecrementCartItemAction {
+  final CartItem _product;
+
+  CartItem get product => _product;
+
+  DecrementCartItemAction(this._product);
 }
 
 class FetchProductsAction {
@@ -68,15 +162,15 @@ class UpdateProductAction {
 
 AppState reducer(AppState prev, dynamic action) {
   if (action is FetchProductsAction) {
-    return AppState(action.products);
+    return AppState(action.products, prev.shoppingcart);
   } else if (action is AddProductsAction) {
     final products = prev.products.toList();
     products.add(action.product);
-    return AppState(products);
+    return AppState(products, prev.shoppingcart);
   } else if (action is DeleteProductsAction) {
     final products =
         prev.products.where((product) => product["_id"] != action.id).toList();
-    return AppState(products);
+    return AppState(products, prev.shoppingcart);
   } else if (action is UpdateProductAction) {
     final products = prev.products.map((product) {
       if (product["_id"] == action.product["_id"]) {
@@ -85,7 +179,45 @@ AppState reducer(AppState prev, dynamic action) {
         return product;
       }
     }).toList();
-    return AppState(products);
+
+    return AppState(products, prev.shoppingcart);
+  } else if (action is FetchShoppingCartAction) {
+    return AppState(prev._products, action.shoppingcart);
+  } else if (action is AddCartItemAction) {
+    List<CartItem> cart = prev._shoppingcart;
+    bool add = true;
+    for (CartItem cartItem in cart) {
+      if (cartItem.name == action._product.name) {
+        cartItem.quantity++;
+        add = false;
+        break;
+      }
+    }
+    if (add) {
+      cart.add(action._product);
+    }
+    saveShoppingCartToSharedPreferences(cart);
+    return AppState(prev._products, cart);
+  } else if (action is RemoveCartItemAction) {
+    List<CartItem> cart = prev._shoppingcart;
+    cart.remove(action._product);
+    saveShoppingCartToSharedPreferences(cart);
+
+    return AppState(prev._products, cart);
+  } else if (action is IncrementCartItemAction) {
+    List<CartItem> cart = prev._shoppingcart;
+    cart[cart.indexOf(action._product)].quantity++;
+    saveShoppingCartToSharedPreferences(cart);
+
+    return AppState(prev._products, cart);
+  } else if (action is DecrementCartItemAction) {
+    List<CartItem> cart = prev._shoppingcart;
+    if (cart[cart.indexOf(action._product)].quantity > 1) {
+      cart[cart.indexOf(action._product)].quantity--;
+    }
+    saveShoppingCartToSharedPreferences(cart);
+
+    return AppState(prev._products, cart);
   } else {
     return prev;
   }
@@ -160,6 +292,41 @@ Future<Map> updateProductAPI(product) async {
   return product;
 }
 
+ThunkAction<AppState> fetchShoppingCart = (
+  Store<AppState> store,
+) async {
+  List<CartItem> cartItems = [
+    CartItem(name: 'Item 1', quantity: 1, price: 10.0),
+    CartItem(name: 'Item 2', quantity: 2, price: 15.0),
+    CartItem(name: 'Item 3', quantity: 3, price: 8.0),
+  ];
+  store.dispatch(FetchShoppingCartAction(cartItems));
+};
+
+ThunkAction<AppState> addItemInShoppingCart(CartItem cartItem) {
+  return (Store<AppState> store) async {
+    store.dispatch(AddCartItemAction(cartItem));
+  };
+}
+
+ThunkAction<AppState> removeItemFromShoppingCart(CartItem cartItem) {
+  return (Store<AppState> store) async {
+    store.dispatch(RemoveCartItemAction(cartItem));
+  };
+}
+
+ThunkAction<AppState> incrementItemInShoppingCart(CartItem cartItem) {
+  return (Store<AppState> store) async {
+    store.dispatch(IncrementCartItemAction(cartItem));
+  };
+}
+
+ThunkAction<AppState> decrementItemInShoppingCart(CartItem cartItem) {
+  return (Store<AppState> store) async {
+    store.dispatch(DecrementCartItemAction(cartItem));
+  };
+}
+
 ThunkAction<AppState> addProduct(Map product) {
   return (Store<AppState> store) async {
     final addedProduct = await addProductAPI(product);
@@ -193,8 +360,9 @@ ThunkAction<AppState> updateProduct(Map product) {
 }
 
 class App extends StatelessWidget {
-  final store = Store<AppState>(reducer,
-      initialState: AppState.initialState(), middleware: [thunkMiddleware]);
+  final Store<AppState> store;
+
+  App({required this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -235,6 +403,9 @@ class App extends StatelessWidget {
           break;
         case CheckoutRoute:
           screen = CheckoutPage();
+          break;
+        case HomeRoute:
+          screen = HomePage();
           break;
         default:
           return null;

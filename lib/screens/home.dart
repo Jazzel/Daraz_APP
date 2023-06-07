@@ -1,129 +1,106 @@
+import 'package:daraz_app/app.dart';
 import 'package:flutter/material.dart';
-import "package:daraz_app/app.dart";
 
-import "package:flutter_redux/flutter_redux.dart";
+import 'package:flutter_redux/flutter_redux.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
+typedef Func = void Function();
 
-typedef FetchProduct = void Function();
-typedef FetchShoppingCart = void Function();
-
-class _HomePageState extends State<HomePage> {
+class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('BizzHome'),
-        backgroundColor: Colors.black,
+        title: Text('My Store'),
+        actions: [
+          IconButton(
+            onPressed: () => Navigator.of(context).pushNamed(ShoppingCartRoute),
+            icon: Icon(Icons.shopping_bag),
+          ),
+        ],
       ),
-      body: Container(
-        margin: EdgeInsets.symmetric(vertical: 10),
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(children: [
-            InkWell(
-              child: Text(
-                "Hello User Dave !",
-                style: TextStyle(fontSize: 20),
-              ),
-              onTap: () {},
+      body: Column(
+        children: [
+          StoreConnector<AppState, AppState>(
+              converter: (store) => store.state,
+              builder: (_, state) {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: state.products.length,
+                    itemBuilder: (context, index) {
+                      final Map product = state.products[index];
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductDetailsPage(product: product),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          child: ListTile(
+                            leading: Image.network(product["image"]),
+                            title: Text(product["name"]),
+                            subtitle: Text(product["description"]),
+                            trailing: Text(product["price"].toString() + "\$"),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+        ],
+      ),
+    );
+  }
+}
+
+class ProductDetailsPage extends StatelessWidget {
+  final Map product;
+
+  ProductDetailsPage({required this.product});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(product["name"]),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.network(product["image"]),
+            SizedBox(height: 16.0),
+            Text(product["description"]),
+            SizedBox(height: 16.0),
+            StoreConnector<AppState, Func>(
+              converter: (store) {
+                return () async {
+                  CartItem cartItem = CartItem(
+                      name: product["name"],
+                      quantity: 1,
+                      price: product["price"]);
+                  store.dispatch(addItemInShoppingCart(cartItem));
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Added to Cart'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+                };
+              },
+              builder: (_, callback) {
+                return ElevatedButton(
+                  onPressed: callback,
+                  child: Text('Add to Cart'),
+                );
+              },
             ),
-            Padding(padding: EdgeInsets.only(top: 20)),
-            StoreConnector<AppState, FetchProduct>(converter: (store) {
-              return () async {
-                store.dispatch(fetchProducts);
-                Navigator.of(context).pushNamed(MyProductsRoute);
-              };
-            }, builder: (_, fetchProductsCallback) {
-              return InkWell(
-                child: Container(
-                  color: Colors.black,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "My Profile",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 10)),
-                        Icon(Icons.supervised_user_circle, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ),
-                onTap: fetchProductsCallback,
-              );
-            }),
-            Padding(padding: EdgeInsets.only(top: 10)),
-            StoreConnector<AppState, FetchProduct>(converter: (store) {
-              return () async {
-                store.dispatch(fetchProducts);
-                Navigator.of(context).pushNamed(MyProductsRoute);
-              };
-            }, builder: (_, fetchProductsCallback) {
-              return InkWell(
-                child: Container(
-                  color: Colors.black,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Products List",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 10)),
-                        Icon(Icons.supervised_user_circle, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ),
-                onTap: fetchProductsCallback,
-              );
-            }),
-            Padding(padding: EdgeInsets.only(top: 10)),
-            StoreConnector<AppState, FetchShoppingCart>(converter: (store) {
-              return () async {
-                Navigator.of(context).pushNamed(ShoppingCartRoute);
-              };
-            }, builder: (_, fetchProductsCallback) {
-              return InkWell(
-                child: Container(
-                  color: Colors.black,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 30),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Shopping Cart",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Padding(padding: EdgeInsets.only(left: 10)),
-                        Icon(Icons.supervised_user_circle, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ),
-                onTap: fetchProductsCallback,
-              );
-            }),
-          ]),
+          ],
         ),
       ),
     );
